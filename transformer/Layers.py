@@ -20,7 +20,7 @@ class EncoderLayer(nn.Module): # 인코더 레이어를 정의한다. nn.Module�
         enc_output, enc_slf_attn = self.slf_attn(
             enc_input, enc_input, enc_input, mask=slf_attn_mask) # self-attention 레이어다. 입력 시퀀스가 들어간다.
         enc_output = self.pos_ffn(enc_output) # 위치별 FeedForward 레이더다.
-        return enc_output, enc_slf_attn
+        return enc_output, enc_slf_attn 
 
 
 class DecoderLayer(nn.Module): # 디코더 레이어를 정의한다.
