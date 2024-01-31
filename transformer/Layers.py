@@ -18,8 +18,8 @@ class EncoderLayer(nn.Module): # 인코더 레이어를 정의한다. nn.Module�
 
     def forward(self, enc_input, slf_attn_mask=None):
         enc_output, enc_slf_attn = self.slf_attn(
-            enc_input, enc_input, enc_input, mask=slf_attn_mask)
-        enc_output = self.pos_ffn(enc_output)
+            enc_input, enc_input, enc_input, mask=slf_attn_mask) # self-attention 레이어다. 입력 시퀀스가 들어간다.
+        enc_output = self.pos_ffn(enc_output) # 위치별 FeedForward 레이더다.
         return enc_output, enc_slf_attn
 
 
@@ -36,8 +36,8 @@ class DecoderLayer(nn.Module): # 디코더 레이어를 정의한다.
             self, dec_input, enc_output,
             slf_attn_mask=None, dec_enc_attn_mask=None):
         dec_output, dec_slf_attn = self.slf_attn(
-            dec_input, dec_input, dec_input, mask=slf_attn_mask)
+            dec_input, dec_input, dec_input, mask=slf_attn_mask) # self-attention 레이어다.
         dec_output, dec_enc_attn = self.enc_attn(
-            dec_output, enc_output, enc_output, mask=dec_enc_attn_mask)
-        dec_output = self.pos_ffn(dec_output)
+            dec_output, enc_output, enc_output, mask=dec_enc_attn_mask) # encoder-decoder 레이어다.
+        dec_output = self.pos_ffn(dec_output) # 위치별 FeedForward 레이어다.
         return dec_output, dec_slf_attn, dec_enc_attn
