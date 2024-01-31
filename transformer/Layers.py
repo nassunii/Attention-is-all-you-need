@@ -7,7 +7,7 @@ from transformer.SubLayers import MultiHeadAttention, PositionwiseFeedForward # 
 __author__ = "Yu-Hsiang Huang" # 논문 저자~
 
 
-class EncoderLayer(nn.Module): # 인코더 레이어를 정의한다.
+class EncoderLayer(nn.Module): # 인코더 레이어를 정의한다. nn.Module을 상속 받는다.
     ''' Compose with two layers '''
 
     def __init__(self, d_model, d_inner, n_head, d_k, d_v, dropout=0.1):
