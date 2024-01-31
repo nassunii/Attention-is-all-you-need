@@ -1,13 +1,13 @@
 ''' Define the Layers '''
 import torch.nn as nn
-import torch
-from transformer.SubLayers import MultiHeadAttention, PositionwiseFeedForward
+import torch # PyTorch는 미분을 자동으로 해줘서 구한 기울기로 가중치를 이용할 수 있게 해준다.
+from transformer.SubLayers import MultiHeadAttention, PositionwiseFeedForward # MultiHeadAttention을 이용한다. 위치별로 FeedForward 신경망을 정의한다.
 
 
-__author__ = "Yu-Hsiang Huang"
+__author__ = "Yu-Hsiang Huang" # 논문 저자~
 
 
-class EncoderLayer(nn.Module):
+class EncoderLayer(nn.Module): # 인코더 레이어를 정의한다.
     ''' Compose with two layers '''
 
     def __init__(self, d_model, d_inner, n_head, d_k, d_v, dropout=0.1):
