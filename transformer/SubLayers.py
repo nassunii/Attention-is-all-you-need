@@ -95,12 +95,14 @@ class PositionwiseFeedForward(nn.Module):
     def forward(self, x):
 
         residual = x # 입력을 residual로 지정한다. residual은 네트워크의 깊이가 깊어질 때 기울기 소실 문제를 해결하는 것에 도움을 준다.
+        # 원본 x의 값을 저장해둔다.
 
         x = self.w_2(F.relu(self.w_1(x))) # 입력 x에 첫 번째 선형 레이어인 self.w_1을 적용하고, 그 결과에ReLU 활성화 함수를 적용한다.
+        # ReLU는 x>0일 때 x=y, x<0일 때 0이다.
         # 두 번째 선형 레이어인 self.w_2를 적용한다. 이 과정으로 비선형성이 추가되고, 위치 정보를 학습할 수 있다.
         x = self.dropout(x) # 드롭아웃을 수행한다.
-        x += residual
+        x += residual # 레이어를 거친 x 값에 원본 x의 값을 더한다.
 
-        x = self.layer_norm(x) # 레이어 정규화를 수행한다.
+        x = self.layer_norm(x) # 레이어 정규화를 수행한다. 평균이 0, 분산이 1이 되게 만들어준다.
 
         return x
