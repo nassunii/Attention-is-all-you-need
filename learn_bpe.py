@@ -116,42 +116,48 @@ def get_pair_statistics(vocab): # 어휘에서 모든 바이트 쌍의 빈도를
     """Count frequency of all symbol pairs, and create index"""
 
     # data structure of pair frequencies
-    stats = defaultdict(int)
+    stats = defaultdict(int) # stats는 바이트 쌍의 빈도를 저장하는 딕셔너리다.
+    # defaultdict(int)는 기본값(default)를 갖는 딕셔너리를 생성하는 것이다.
+    # 여기서는 기본값을 정수 0으로 가지는 딕셔너리를 생성한다.
 
     #index from pairs to words
-    indices = defaultdict(lambda: defaultdict(int))
+    indices = defaultdict(lambda: defaultdict(int)) # 바이트 쌍에 대한 인덱스를 저장하는 딕셔너리다.
+    # 각 바이트 쌍이 어떤 단어에서 등장했는지 기록한다.
+    # lambda:를 쓰면 간단한 함수를 생성할 수 있다. 여기서는 인자를 받지 않는 함수를 정의한다.
 
-    for i, (word, freq) in enumerate(vocab):
-        prev_char = word[0]
-        for char in word[1:]:
-            stats[prev_char, char] += freq
-            indices[prev_char, char][i] += 1
+    for i, (word, freq) in enumerate(vocab): # enumerate(vocab)은 vocab에서 각 단어와 그 빈도를 순회한다.
+        # i에는 인덱스, (word, freq)에는 단어와 빈도가 할당된다.
+        prev_char = word[0] # 각 단어의 첫 번째 문자를 prev_char에 할당한다.
+        for char in word[1:]: # 첫 문자 이후에 반복한다.
+            stats[prev_char, char] += freq # 현재 문자인 char과 이전 문자인 prev_char로 이루어진 바이트 쌍의 빈도를 업데이트한다.
+            indices[prev_char, char][i] += 1 # 현재의 바이트쌍이 어떤 단어에서 등장했는지 인덱스를 기록한다.
             prev_char = char
 
     return stats, indices
 
-
+# 하나의 바이트 쌍에 대하여 아래의 코드를 수행한다.
 def replace_pair(pair, vocab, indices): # 주어진 바이트 쌍을 새로운 심볼로 교체한다.
     """Replace all occurrences of a symbol pair ('A', 'B') with a new symbol 'AB'"""
     first, second = pair
-    pair_str = ''.join(pair)
-    pair_str = pair_str.replace('\\','\\\\')
+    pair_str = ''.join(pair) # 바이트 쌍을 문자열로 결합해서 pair_str 변수에 저장한다.
+    pair_str = pair_str.replace('\\','\\\\') # 백슬래시를 추가한다. AB-> A/B
     changes = []
-    pattern = re.compile(r'(?<!\S)' + re.escape(first + ' ' + second) + r'(?!\S)')
-    if sys.version_info < (3, 0):
+    pattern = re.compile(r'(?<!\S)' + re.escape(first + ' ' + second) + r'(?!\S)') # 바이트 쌍을 대체할 때 사용할 패턴을 정의한다.
+    # 바이트 쌍의 양쪽에 공백이 있을 때만 대체하도록 정의되어 있다.
+    if sys.version_info < (3, 0): # 여기는 파이썬 버전 맞춰주는 파트다.
         iterator = indices[pair].iteritems()
     else:
         iterator = indices[pair].items()
-    for j, freq in iterator:
-        if freq < 1:
+    for j, freq in iterator: # 바이트 쌍이 등장한 단어의 인덱스와 빈도에 대하여 반복한다.
+        if freq < 1: # 바이트 쌍의 빈도가 1 미만이면 반복문을 계속 진행한다.
             continue
-        word, freq = vocab[j]
-        new_word = ' '.join(word)
-        new_word = pattern.sub(pair_str, new_word)
-        new_word = tuple(new_word.split(' '))
+        word, freq = vocab[j] # vocab에서 해당 인덱스에 대응하는 단어와 빈도를 가져온다.
+        new_word = ' '.join(word) # 가져온 단어에 공백을 붙이고 문자열로 만든다.
+        new_word = pattern.sub(pair_str, new_word) # 위에서 만든 패턴을 사용한다. 바이트 쌍을 만든 심볼로 바꿔준다.
+        new_word = tuple(new_word.split(' ')) # 심볼로 바꾸었으니 공백을 기준으로 다시 분할하고 튜플로 바꾼다.
 
-        vocab[j] = (new_word, freq)
-        changes.append((j, new_word, word, freq))
+        vocab[j] = (new_word, freq) # 변경된 단어와 기존의 빈도를 사용해서 vocab을 업데이트한다.
+        changes.append((j, new_word, word, freq)) # 여기도 정보를 맞게 업데이트한다.
 
     return changes
 
