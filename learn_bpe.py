@@ -162,86 +162,115 @@ def replace_pair(pair, vocab, indices): # 주어진 바이트 쌍을 새로운 �
     return changes
 
 def prune_stats(stats, big_stats, threshold): # 빈도가 낮은 바이트 쌍을 제거하여 계산 효율성을 향상시킨다.
+    # max() 함수의 효율성을 향상시키기 위하여 빈도가 낮은 바이트 쌍을 제거한다.
+    # stats는 딕셔너리를 순회하여 각 바이트 쌍의 빈도를 확인한다.
+    
     """Prune statistics dict for efficiency of max()
 
     The frequency of a symbol pair never increases, so pruning is generally safe
     (until we the most frequent pair is less frequent than a pair we previously pruned)
     big_stats keeps full statistics for when we need to access pruned items
     """
-    for item,freq in list(stats.items()):
-        if freq < threshold:
+
+    for item,freq in list(stats.items()): 
+        if freq < threshold: # 임계값인 threshold보다 작으면 바이트 쌍을 stats 딕셔너리에서 제거한다.
+            # 빈도가 임계값보다 크거나 같으면 그대로 유지한다.
             del stats[item]
-            if freq < 0:
+            if freq < 0: # 빈도인 freq가 음수면 big_stats 딕셔너리에 더해준다.
+                # 전체 통계 정보를 유지하기 위해서 big_stats에 보존하는 것이다.
                 big_stats[item] += freq
-            else:
+            else: # 양수면 그대로 big_stats에 할당한다.
                 big_stats[item] = freq
 
 
 def learn_bpe(infile_names, outfile_name, num_symbols, min_frequency=2, verbose=False, is_dict=False, total_symbols=False):
-    # 여러 파일에서 어휘를 수집하고, 주어진 바이트 쌍의 수에 도달할 때까지 가장 빈도가 높은 바이트 쌍을 학습하여 파일에 저장한다.
+    # infile_names 파일에서 어휘를 수집하고, 주어진 바이트 쌍의 수에 도달할 때까지 가장 빈도가 높은 바이트 쌍을 학습하여 파일에 저장한다.
+    
     """Learn num_symbols BPE operations from vocabulary, and write to outfile.
     """
-    sys.stderr = codecs.getwriter('UTF-8')(sys.stderr.buffer)
-    sys.stdout = codecs.getwriter('UTF-8')(sys.stdout.buffer)
-    sys.stdin = codecs.getreader('UTF-8')(sys.stdin.buffer)
+    # 아래의 코드 3줄 파이썬 버전 호환을 위하여 작성된 코드다.
+    sys.stderr = codecs.getwriter('UTF-8')(sys.stderr.buffer) # sys.stderr은 표준 오류 출력 스트림이다. 인코딩을 설정한다.
+    sys.stdout = codecs.getwriter('UTF-8')(sys.stdout.buffer) # sys.stdout은 표준 출력 스트림이다. 인코딩을 설정한다.
+    sys.stdin = codecs.getreader('UTF-8')(sys.stdin.buffer) # sys.stdin은 표준 입력 스트림이다. 디코딩을 설정한다.
 
     #vocab = get_vocabulary(infile, is_dict)
-    vocab = Counter()
-    for f in infile_names:
-        sys.stderr.write(f'Collecting vocab from {f}\n')
-        vocab = update_vocabulary(vocab, f, is_dict)
+    vocab = Counter() # Counter 객체를 이용해서 빈도수를 세기 위한 vocab을 초기화한다.
+    for f in infile_names: # infile_names를 순회한다.
+        sys.stderr.write(f'Collecting vocab from {f}\n') # 현재 처리 중인 파일의 이름을 출력한다. 과정을 추적하기 위한 메세지다.
+        vocab = update_vocabulary(vocab, f, is_dict) # update_vocabulary를 이용해서 각 파일의 어휘를 업데이트한다.
+        # update_vocabulary는 위에서 나왔던 것처럼 파일에서 텍스트를 읽어와서 어휘를 추출하고 빈도수를 계산해서 Counter 객체에 더한다.
 
-    vocab = dict([(tuple(x[:-1])+(x[-1]+'</w>',) ,y) for (x,y) in vocab.items()])
-    sorted_vocab = sorted(vocab.items(), key=lambda x: x[1], reverse=True)
+    vocab = dict([(tuple(x[:-1])+(x[-1]+'</w>',) ,y) for (x,y) in vocab.items()]) # 각 단어를 BPE 알고리즘에 맞게 가공한다.
+    # 마지막 문자 뒤에 </w>를 추가하고 단어를 튜플로 변환해서 딕셔너리 형태로 저장한다.
+    # 이 과정을 거치면 BPE 알고리즘이 더 효과적으로 단어를 합병할 수 있게 된다.
+    sorted_vocab = sorted(vocab.items(), key=lambda x: x[1], reverse=True) # 어휘를 빈도수에 따라서 내림차순으로 정렬한다.
+    # BPE 알고리즘에서 높은 빈도수를 갖는 바이트 쌍을 먼저 학습하게 된다.
 
-    stats, indices = get_pair_statistics(sorted_vocab)
-    big_stats = copy.deepcopy(stats)
+    stats, indices = get_pair_statistics(sorted_vocab) # sorted_vocab을 이용해서 바이트 쌍의 빈도와 인덱스를 계산한다.
+    big_stats = copy.deepcopy(stats) # 초기의 바이트 쌍 빈도와 인덱스를 big_stats에 복사한다. (초기 자료 보존)
 
-    if total_symbols:
-        uniq_char_internal = set()
-        uniq_char_final = set()
-        for word in vocab:
-            for char in word[:-1]:
-                uniq_char_internal.add(char)
-            uniq_char_final.add(word[-1])
-        sys.stderr.write('Number of word-internal characters: {0}\n'.format(len(uniq_char_internal)))
-        sys.stderr.write('Number of word-final characters: {0}\n'.format(len(uniq_char_final)))
+    if total_symbols: # total_symbols가 True면 단어 내부와 단어 마지막에 있는 고유한 문자의 수를 계산한다.
+        # 그 후 BPE 알고리즘에서 합치는 작업 수를 감소시킨다.
+        uniq_char_internal = set() # 단어 내부에 있는 고유한 문자를 저장하기 위한 집합을 초기화한다.
+        uniq_char_final = set() # 단어 마지막에 있는 고유한 문자를 저장하기 위한 집합을 초기화한다.
+        for word in vocab: # vocab에 있는 각 단어에 대해서 반복한다.
+            for char in word[:-1]: # 각단어의 마지막 문자를 제외한 문자에 대해서 반복한다. 
+                uniq_char_internal.add(char) # 각 문자를 uniq_char_internal 집합에 추가한다. 단어 내부에 있는 모든 고유한 문자가 추가된다.
+            uniq_char_final.add(word[-1]) # 단어의 마지막 문자를 uniq_char_final 집합에 추가한다.
+        sys.stderr.write('Number of word-internal characters: {0}\n'.format(len(uniq_char_internal))) # 단어 내부에 있는 고유한 문자의 수를 출력한다.
+        sys.stderr.write('Number of word-final characters: {0}\n'.format(len(uniq_char_final))) # 단어 마지막에 있는 고유한 문자의 수를 출력한다.
         sys.stderr.write('Reducing number of merge operations by {0}\n'.format(len(uniq_char_internal) + len(uniq_char_final)))
-        num_symbols -= len(uniq_char_internal) + len(uniq_char_final)
+        # BPE 알고리즘에서 합치는 작업 수를 감소시키기 위하여 단어 내부와 마지막에 있는 모든 고유한 문자의 수를 더한 값을 출력한다.
+        num_symbols -= len(uniq_char_internal) + len(uniq_char_final) # BPE 알고리즘에서 합치는 작업의 수를 감소시킨다.
+        # 이전에 계산된 합을 뺀다. (합쳐진만큼 빼서 수를 줄인다.)
 
 
-    sys.stderr.write(f'Write vocab file to {outfile_name}')
-    with codecs.open(outfile_name, 'w', encoding='utf-8') as outfile:
+    sys.stderr.write(f'Write vocab file to {outfile_name}') # 오류 출력 스트림에 vocab file을 쓸 것이라는 것을 메세지로 출력하게 한다.
+    with codecs.open(outfile_name, 'w', encoding='utf-8') as outfile: # UTF-8 인코딩으로 어휘 파일을 쓰기 위해서 codecs.oen()을 이용하여 파일을 연다.
         # version 0.2 changes the handling of the end-of-word token ('</w>');
         # version numbering allows bckward compatibility
 
-        outfile.write('#version: 0.2\n')
+        outfile.write('#version: 0.2\n') # vocab 파일의 첫 줄에 버전 정보를 쓰기 위하여 outfile.write()를 사용한다.
+        # 버전이 바뀔 때 호환성을 유지하기 위해서 하는 과정이다.
         # threshold is inspired by Zipfian assumption, but should only affect speed
-        threshold = max(stats.values()) / 10
-        for i in range(num_symbols):
-            if stats:
-                most_frequent = max(stats, key=lambda x: (stats[x], x))
+        threshold = max(stats.values()) / 10 # 임계값인 threshold를 설정한다. Zipf의 법칙을 참고해서 만들어진 값이다.
+        # stats.values()는 바이트 쌍의 빈도를 나타내는 딕셔너리에서 빈도값들을 추출한 리스트다.
+        # 최대값을 찾아서 10으로 나눈 값을 thresold로 설정한다.
+        # thresold를 설정해서 BPE 학습의 속도를 조절할 수 있다.
+        # Zipf의 법칙은 어떤 자연어에서 상위 빈도의 단어가 전체 단어 빈도의 상당 부분을 차지한다는 법칙이다.
+        
+        # 가장 빈도가 높은 바이트 쌍을 학습하는 과정이다.
+        for i in range(num_symbols): # 위에서 구한 num_symbols만큼 반복한다.
+            if stats: # stats 딕셔너리에 바이트 쌍의 정보가 있는지 확인한다.
+                most_frequent = max(stats, key=lambda x: (stats[x], x)) # 현재 정보에서가장 빈도가 높은 바이트 쌍을 찾는다.
+                # stats[x],x를 기준으로 최댓값을 찾는다. stats[x]는 빈도수고, x는 바이트 쌍 자체를 의미한다.
 
             # we probably missed the best pair because of pruning; go back to full statistics
             if not stats or (i and stats[most_frequent] < threshold):
-                prune_stats(stats, big_stats, threshold)
-                stats = copy.deepcopy(big_stats)
-                most_frequent = max(stats, key=lambda x: (stats[x], x))
+                # stats가 비어있거나(학습 초기다.) 이전에 찾은 가장 빈도가 높은 바이트 쌍의 빈도가 현재의 threshold보다 낮은 경우에 실행한다.
+                # 이전에 제거한 바이트 쌍이 있다고 가정하고 전체 통계 정보로 돌아가서 다시 계산한다.
+                prune_stats(stats, big_stats, threshold) # prune_stats 함수를 호출해서 빈도가 낮은 바이트 쌍을 제거한다.
+                stats = copy.deepcopy(big_stats) # big_stats를 복사해서 stats에 할당한다.
+                most_frequent = max(stats, key=lambda x: (stats[x], x)) # 새로 업데이트된 stats에서 가장 빈도가 높은 바이트를 찾는다.
                 # threshold is inspired by Zipfian assumption, but should only affect speed
-                threshold = stats[most_frequent] * i/(i+10000.0)
-                prune_stats(stats, big_stats, threshold)
+                threshold = stats[most_frequent] * i/(i+10000.0) # 새로운 임계값을 설정한다. 현재까지의 학습 횟수인 i에 따라서 조정된다.
+                prune_stats(stats, big_stats, threshold) # 새로 계산된 임계값을 기반으로 다시 빈도가 낮은 바이트 쌍을 제거한다.
 
-            if stats[most_frequent] < min_frequency:
-                sys.stderr.write(f'no pair has frequency >= {min_frequency}. Stopping\n')
+            # BPE 알고리즘에서 학습된 가장 빈도가 높은 바이트 쌍을 이용해서 합병 작업을 수행하고, 통계를 업데이트하는 부분이다.
+            if stats[most_frequent] < min_frequency: # 학습된 가장 빈도가 높은 바이트 쌍의 빈도가 사용자가 설정한 최소 빈도인 min_frequency보다 작은 경우에 실행된다.
+                sys.stderr.write(f'no pair has frequency >= {min_frequency}. Stopping\n') # 이 경우에 빈도가 충분히 높은 바이트 쌍이 없다고 판단되어 학습을 중단하고 프로그램이 종료된다.
+                # 오류 출력 메세지를 출력한다.
                 break
 
-            if verbose:
-                sys.stderr.write('pair {0}: {1} {2} -> {1}{2} (frequency {3})\n'.format(
-                    i, most_frequent[0], most_frequent[1], stats[most_frequent]))
-            outfile.write('{0} {1}\n'.format(*most_frequent))
-            changes = replace_pair(most_frequent, sorted_vocab, indices)
-            update_pair_statistics(most_frequent, changes, stats, indices)
-            stats[most_frequent] = 0
-            if not i % 100:
+            if verbose: # verbose 모드가 활성화된 경우에 실행한다.
+                # verbos 모드는 각 합병 작업의 진행 상황을 자세히 출력하도록 하는 옵션이다.
+                sys.stderr.write('pair {0}: {1} {2} -> {1}{2} (frequency {3})\n'.format( 
+                    i, most_frequent[0], most_frequent[1], stats[most_frequent])) # 현재까지의 합병 작업 횟수와 해당 작업에서 합병되는 두 바이트 쌍 빈도를 출력한다.
+                # 학습 진행 상황을 확인하는 것에 사용된다.
+            outfile.write('{0} {1}\n'.format(*most_frequent)) # 학습된 바이트 쌍을 출력 파일에 기록한다.
+            changes = replace_pair(most_frequent, sorted_vocab, indices) # replace_pair 함수를 호출해서 합병된 바이트 쌍으로 대체된 단어들의 변화를 불러온다.
+            update_pair_statistics(most_frequent, changes, stats, indices) # update_pair_statistics 함수를 호출해서 합병 작업에 따른 통계 정보를 업데이트한다.
+            stats[most_frequent] = 0 # 합병된 바이트 쌍의 빈도를 0으로 설정해서 해당 쌍을 다시 선택하지 않도록 한다.
+            if not i % 100: # 100번째 합병 작업마다 prune_stats 함수를 호출해서 빈도가 낮은 바이트 쌍을 정리해서 메모리를 관리한다.
                 prune_stats(stats, big_stats, threshold)
 
