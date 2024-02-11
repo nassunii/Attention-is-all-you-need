@@ -140,7 +140,7 @@ def replace_pair(pair, vocab, indices): # 주어진 바이트 쌍을 새로운 �
     """Replace all occurrences of a symbol pair ('A', 'B') with a new symbol 'AB'"""
     first, second = pair
     pair_str = ''.join(pair) # 바이트 쌍을 문자열로 결합해서 pair_str 변수에 저장한다.
-    pair_str = pair_str.replace('\\','\\\\') # 백슬래시를 추가한다. AB-> A/B
+    pair_str = pair_str.replace('\\','\\\\') # 백슬래시를 추가한다. AB-> A\B
     changes = []
     pattern = re.compile(r'(?<!\S)' + re.escape(first + ' ' + second) + r'(?!\S)') # 바이트 쌍을 대체할 때 사용할 패턴을 정의한다.
     # 바이트 쌍의 양쪽에 공백이 있을 때만 대체하도록 정의되어 있다.
