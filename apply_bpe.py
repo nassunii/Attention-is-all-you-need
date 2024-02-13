@@ -11,6 +11,9 @@ Rico Sennrich, Barry Haddow and Alexandra Birch (2015). Neural Machine Translati
 Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics (ACL 2016). Berlin, Germany.
 """
 
+"""예원 작성"""
+
+
 from __future__ import unicode_literals, division
 
 import sys
