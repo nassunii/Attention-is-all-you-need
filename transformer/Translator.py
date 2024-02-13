@@ -1,5 +1,5 @@
 ''' This module will handle the text generation with beam search. '''
-# beam search를 사용해서 텍스트를 생성한다. 
+# beam search를 사용해서 텍스트를 생성한다.  
 # beam search는 시퀀스 생성 작업에서 사용되는 탐색 알고리즘 중 하나다. 가장 가능성 높은 시퀀스를 찾는 것에 이용된다.
 
 import torch
