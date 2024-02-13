@@ -1,4 +1,5 @@
 ''' Translate input text with trained model. '''
+"""예원 작성"""
 
 import torch
 import argparse
@@ -11,6 +12,7 @@ import transformer.Constants as Constants
 from torchtext.data import Dataset
 from transformer.Models import Transformer
 from transformer.Translator import Translator
+
 
 
 def load_model(opt, device):
