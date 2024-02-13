@@ -6,17 +6,15 @@ from transformer.Layers import EncoderLayer, DecoderLayer
 
 
 __author__ = "Yu-Hsiang Huang"
-
-'''
+"""예원 작성
 [pad] 토큰은 모델이 입력으로 받는 <최대길이>보다 길이가 짧은 문장들에 한해 부여되는 토큰
 [pad] 토큰은 실질적인 의미가 없으므로, [pad]토큰 반영 안해주기 위해서 
-
 나중에 scaledotproduct에서 쓰임!!!
-'''
+"""
 def get_pad_mask(seq, pad_idx):  #패딩된 부분을 마스킹 -> 패딩된 위치에 0을, 패딩되지 않은 위치에 1을 -> 패딩된 곳 연산 안하도록
     return (seq != pad_idx).unsqueeze(-2)  #두번째 차원에 1추가
 
-"""
+"""예원 작성
 얘가 다음 단어에 대한 마스킹 생성하는 것-> cheating 예방
 """
 def get_subsequent_mask(seq):
@@ -145,7 +143,7 @@ class Decoder(nn.Module):
             return dec_output, dec_slf_attn_list, dec_enc_attn_list
         return dec_output,
 
-
+"""예원 작성"""
 class Transformer(nn.Module):
     ''' A sequence to sequence model with attention mechanism. '''
 
