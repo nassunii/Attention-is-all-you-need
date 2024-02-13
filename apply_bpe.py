@@ -28,7 +28,7 @@ bpe_init_ -> process_line -> recursive_split -> check_vocab_and_split -> encode 
 
 
 class BPE(object):
-                                        # '@@'는 subunit임 구분자? close@@d ?? 
+                                        #'@@'는 subunit임 구분자? close@@d ?? 
     def __init__(self, codes, merges=-1, separator='@@', vocab=None, glossaries=None):
 
         #codes: 파일 객체
