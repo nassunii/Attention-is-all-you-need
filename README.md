@@ -17,9 +17,11 @@ forked from https://github.com/jadore801120/attention-is-all-you-need-pytorch
 **[1회차]**  
 
 modules -> sublayers -> layers -> models
-- moduels
+- modules
 - sublayers
-- layers는 모두 이해가 필요하다고 생각되어 공통학습
+- layers
+  modules/ sublayers/ layers는 모두 이해가 필요하다고 생각되어 공통학습
+  models.py만 파트 분배
   
 *<주석>*
 models에서
