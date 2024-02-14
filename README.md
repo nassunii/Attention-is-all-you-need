@@ -31,8 +31,9 @@ modules -> sublayers -> layers -> models
 
   modules/ sublayers/ layers는 모두 이해가 필요하다고 생각되어 공통학습
   models.py만 파트 분배
-```
+
 *<models.py주석>*
+```
 - encoder: 예선
 - decoder: 다연
 - transforemr: 예원
@@ -45,8 +46,8 @@ modules -> sublayers -> layers -> models
 
 learn_bpe -> apply_bpe -> preprocess
 
-```
 *<주석>*
+```
 - learn_bpe: 다연
 - apply_bpe: 예원
 - preprocess: 예선
@@ -57,8 +58,8 @@ learn_bpe -> apply_bpe -> preprocess
 
 optim-> train -> translator -> translate
 
-```
 *<주석>*
+```
 - optim: 예선
 - train: 예선
 - translator: 다연
