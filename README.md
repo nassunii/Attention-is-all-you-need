@@ -4,7 +4,7 @@ forked from https://github.com/jadore801120/attention-is-all-you-need-pytorch
 paper: https://arxiv.org/abs/1706.03762
 
 ## 스터디원
-[Yeseon Hong] (https://github.com/nassunii)
+[Yeseon Hong](https://github.com/nassunii)
 [Dayeon Seo] (https://github.com/dayeon-seo)
 [Yewon Kim] (https://github.com/yewonkim01)
 
