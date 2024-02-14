@@ -1,16 +1,16 @@
 # Attention is all you need Study (Add comments)
 forked from https://github.com/jadore801120/attention-is-all-you-need-pytorch  
 paper: https://arxiv.org/abs/1706.03762
-<br/><br/><br/><br/>
+<br/><br/><br/>
 
 ## 스터디원
 - [Yeseon Hong](https://github.com/nassunii)
 - [Dayeon Seo](https://github.com/dayeon-seo)
 - [Yewon Kim](https://github.com/yewonkim01)
 
+<br/><br/><br/>
 
-
-### 스터디 진행 과정
+# 스터디 진행 과정
 스터디는 회차별 분량을 지정해 본인이 맡은 파트(사다리 타기로 결정)를 공부해온 후  
 줌미팅에서 본인 파트를 설명하고 q&a하는 방식으로 진행하였음  
 공통으로 학습한 부분 주석은 가장 마지막에 커밋한 사람으로 설정됨
