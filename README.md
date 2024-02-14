@@ -27,7 +27,7 @@ models에서
 - decoder: 다연
 - transforemr: 예원
 
-  (encoder, decoder, transformer 외 다른 함수는 본인 클래스에서 필요한 경우 주석달기)
+  (models.py 내 encoder, decoder, transformer 외 다른 함수는 본인 클래스에서 필요한 경우 주석달기)
 ---
 
 **[2회차]**  
