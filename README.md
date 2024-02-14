@@ -13,7 +13,8 @@ forked from https://github.com/jadore801120/attention-is-all-you-need-pytorch
 2-2회차: 2/11 (못한 부분만 잠깐 진행)  
 3회차: 2/12
 
-**[1회차]**
+**[1회차]**  
+
 modules -> sublayers -> layers -> models
 - moduels
 - sublayers
@@ -25,14 +26,16 @@ modules -> sublayers -> layers -> models
   (encoder, decoder, transformer 외 다른 함수는 본인 클래스에서 필요한 경우 주석달기)
 ---
 
-**[2회차]**
+**[2회차]**  
+
 learn_bpe -> apply_bpe -> preprocess
 - learn_bpe: 다연
 - apply_bpe: 예원
 - preprocess: 예선
 ----
 
-**[3회차]**
+**[3회차]**  
+
 optim-> train -> translator -> translate
 - optim: 예선
 - train: 예선
