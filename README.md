@@ -7,10 +7,12 @@ forked from https://github.com/jadore801120/attention-is-all-you-need-pytorch
 스터디는 회차별 분량을 지정해 본인이 맡은 파트(사다리 타기로 결정)를 공부해오고 줌미팅에서 본인 파트를 설명하고 q&a하는 방식으로 진행하였음
 공통으로 학습한 부분 주석은 가장 마지막에 커밋한 사람으로 하였음
 
+
 1회차: 2/5
 2회차: 2/8 
 2-2회자: 2/11 (못한 부분만 잠깐 진행)
 3회차: 2/12
+
 
 modules -> sublayers -> layers -> models
 - moduels
