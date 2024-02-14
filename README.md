@@ -22,10 +22,10 @@ modules -> sublayers -> layers -> models
 - layers는 모두 이해가 필요하다고 생각되어 공통학습
 - 
 *<주석>*
-- models에서
-  encoder: 예선
-  decoder: 다연
-  transformer: 예원
+models에서
+- encoder: 예선
+- decoder: 다연
+- transformer: 예원
 
   (encoder, decoder, transformer 외 다른 함수는 본인 클래스에서 필요한 경우 주석달기)
 ---
