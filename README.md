@@ -40,7 +40,7 @@ models.py만 파트 분배
 ```
 - encoder: 예선
 - decoder: 다연
-- transforemr: 예원
+- transformer: 예원
 
 (models.py 내 encoder, decoder, transformer 외 다른 함수는 본인 클래스에서 필요한 경우 주석달기)
 ```
