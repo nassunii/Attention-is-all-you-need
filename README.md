@@ -29,8 +29,8 @@ modules -> sublayers -> layers -> models
 - sublayers
 - layers
 
-  modules/ sublayers/ layers는 모두 이해가 필요하다고 생각되어 공통학습
-  models.py만 파트 분배
+modules/ sublayers/ layers는 모두 이해가 필요하다고 생각되어 공통학습
+models.py만 파트 분배
 <br/>
 
 *<models.py주석>*
@@ -39,7 +39,7 @@ modules -> sublayers -> layers -> models
 - decoder: 다연
 - transforemr: 예원
 
-  (models.py 내 encoder, decoder, transformer 외 다른 함수는 본인 클래스에서 필요한 경우 주석달기)
+(models.py 내 encoder, decoder, transformer 외 다른 함수는 본인 클래스에서 필요한 경우 주석달기)
 ```
 ---
 
