@@ -5,8 +5,9 @@ paper: https://arxiv.org/abs/1706.03762
 
 ## 스터디원
 ---
-[nassuni] https://github.com/nassunii
-@
+[Yeseon Hong] 
+
+
 
 ### 스터디 진행 과정
 스터디는 회차별 분량을 지정해 본인이 맡은 파트(사다리 타기로 결정)를 공부해온 후  
