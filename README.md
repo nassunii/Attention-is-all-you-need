@@ -1,5 +1,6 @@
 # Attention is all you need Study(Add comments)
-forked from https://github.com/jadore801120/attention-is-all-you-need-pytorch
+forked from https://github.com/jadore801120/attention-is-all-you-need-pytorch  
+paper: https://arxiv.org/abs/1706.03762
 
 ##스터디원
 @nassuni
