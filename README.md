@@ -31,7 +31,7 @@ modules -> sublayers -> layers -> models
 - sublayers
 - layers
 
-modules/ sublayers/ layers는 모두 이해가 필요하다고 생각되어 공통학습
+modules/ sublayers/ layers는 모두 이해가 필요하다고 생각되어 공통학습<br/>
 models.py만 파트 분배
 <br/>
 
