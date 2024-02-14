@@ -4,7 +4,8 @@ forked from https://github.com/jadore801120/attention-is-all-you-need-pytorch
 paper: https://arxiv.org/abs/1706.03762
 
 ## 스터디원
-@nassuni
+---
+[nassuni] https://github.com/nassunii
 @
 
 ### 스터디 진행 과정
