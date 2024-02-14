@@ -4,6 +4,7 @@ import torch.nn as nn
 import numpy as np
 from transformer.Layers import EncoderLayer, DecoderLayer
 
+# padding token : 지정된 matrix 크기보다 작은 문자열들에 한해 부여되는 token (=공백처리)
 
 __author__ = "Yu-Hsiang Huang"
 """예원 작성
@@ -27,8 +28,10 @@ def get_subsequent_mask(seq):
     return subsequent_mask
 
 
+#input으로 들어갈 vector 안에 positional encoding(단어의 위치 정보) 포함
 class PositionalEncoding(nn.Module):
 
+    #d_hid : 주어진 차원
     def __init__(self, d_hid, n_position=200):
         super(PositionalEncoding, self).__init__()
 
@@ -41,7 +44,8 @@ class PositionalEncoding(nn.Module):
 
         def get_position_angle_vec(position):
             return [position / np.power(10000, 2 * (hid_j // 2) / d_hid) for hid_j in range(d_hid)]
-
+        
+        #sin과 cos를 이용해 위치(Posisiton) encoding table형성
         sinusoid_table = np.array([get_position_angle_vec(pos_i) for pos_i in range(n_position)])
         sinusoid_table[:, 0::2] = np.sin(sinusoid_table[:, 0::2])  # dim 2i
         sinusoid_table[:, 1::2] = np.cos(sinusoid_table[:, 1::2])  # dim 2i+1
@@ -50,7 +54,8 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         return x + self.pos_table[:, :x.size(1)].clone().detach()
-
+        # x(input vector) + encoding vector(위치 정보)
+    
 
 class Encoder(nn.Module):
     ''' A encoder model with self attention mechanism. '''
@@ -61,15 +66,20 @@ class Encoder(nn.Module):
 
         super().__init__()
 
+        #input 단어 embedding
         self.src_word_emb = nn.Embedding(n_src_vocab, d_word_vec, padding_idx=pad_idx)
+        #위치(Position) encoding
         self.position_enc = PositionalEncoding(d_word_vec, n_position=n_position)
+        #이게 residual Dropout?
         self.dropout = nn.Dropout(p=dropout)
+        #여러 개의 Encoder layer를 쌓아올림
         self.layer_stack = nn.ModuleList([
+            #하나의 Encoder layer를 정의
             EncoderLayer(d_model, d_inner, n_head, d_k, d_v, dropout=dropout)
-            for _ in range(n_layers)])
+            for _ in range(n_layers)]) #n_layers = Encoder layer의 총 개수
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
-        self.scale_emb = scale_emb
-        self.d_model = d_model
+        self.scale_emb = scale_emb #scale할지말지 여부 결정
+        self.d_model = d_model #model의 hidden state 차원 나타냄
 
     def forward(self, src_seq, src_mask, return_attns=False):
 
@@ -87,8 +97,10 @@ class Encoder(nn.Module):
             enc_slf_attn_list += [enc_slf_attn] if return_attns else []
 
         if return_attns:
-            return enc_output, enc_slf_attn_list
+            #True인 경우, 각 layer의 Self Attention 가중치(W)를 list에 저장하여 return
+            return enc_output, enc_slf_attn_list #Self-Attention 가중치를 포함하는 list
         return enc_output,
+
 
 
 class Decoder(nn.Module):

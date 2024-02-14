@@ -18,12 +18,14 @@ class MultiHeadAttention(nn.Module):
         self.d_k = d_k # 각 head마다 사용되는 key 벡터의 차원이다.
         self.d_v = d_v # 각 head마다 사용되는 value 벡터의 차원이다.
 
+        #learn linear projection -> then, we perform in parallel
         # 아래의 코드들은 각 head가 입력을 서로 다른 부분 공간으로 매핑하고, 다양한 정보를 추출할 수 있도록 한다.
         self.w_qs = nn.Linear(d_model, n_head * d_k, bias=False) # query에 대한 선형 변환 레이어다. 편향을 사용하지 않는다.
         self.w_ks = nn.Linear(d_model, n_head * d_k, bias=False) # key에 대한 선형 변환 레이어다. 편향을 사용하지 않는다.
         self.w_vs = nn.Linear(d_model, n_head * d_v, bias=False) # value에 대한 선형 변환 레이어다. 편향을 사용하지 않는다.
         self.fc = nn.Linear(n_head * d_v, d_model, bias=False) # 선형 변환 레이어의 정의다. 편향을 사용하지 않는다.
 
+        #각각의 sub-layer들을 연결하기 위해, 입력 문장에 더하고 Normalization
         self.attention = ScaledDotProductAttention(temperature=d_k ** 0.5) # Scaled Dot-Product 어텐션의 정의다.
 
         self.dropout = nn.Dropout(dropout) # Multi-Head Attention에서 이용되는 드롭아웃을 정의한다.

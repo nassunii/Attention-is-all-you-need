@@ -2,8 +2,10 @@
 # 옵티마이저는 모델의 가중치를 조절하여 손실 함수를 최소화하는 방향으로 학습하는 알고리즘이다.
 import numpy as np
 
+#학습률 scaling -> 학습의 안정성과 성능 향상
 class ScheduledOptim():
     '''A simple wrapper class for learning rate scheduling'''
+    # 기본 data type을 Object로 변환하기 위해 수행 -> 외부에서 기본 type 값 변경 불가
 
     def __init__(self, optimizer, lr_mul, d_model, n_warmup_steps):
         self._optimizer = optimizer
@@ -16,6 +18,7 @@ class ScheduledOptim():
     def step_and_update_lr(self):
         "Step with the inner optimizer" # 내부 옵티마이저로 단계를 진행하고 학습률을 업데이트한다.
         self._update_learning_rate() # 학습률 업데이트.
+        #gradient 초기화
         self._optimizer.step()
 
 
@@ -34,8 +37,8 @@ class ScheduledOptim():
         ''' Learning rate scheduling per step ''' # 각 단계마다 학습률을 스케줄링한다.
 
         self.n_steps += 1
-        lr = self.lr_mul * self._get_lr_scale()
+        lr = self.lr_mul * self._get_lr_scale() #학습률 계산
 
         for param_group in self._optimizer.param_groups:
-            param_group['lr'] = lr
+            param_group['lr'] = lr #각 매개변수(parameter) group에 대한 학습률 update
 

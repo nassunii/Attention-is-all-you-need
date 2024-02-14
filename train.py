@@ -23,15 +23,25 @@ from transformer.Optim import ScheduledOptim
 
 __author__ = "Yu-Hsiang Huang"
 
+#예측값(pred)과 실제값(gold)를 이용해 코드 성능 계산
 def cal_performance(pred, gold, trg_pad_idx, smoothing=False):
     ''' Apply label smoothing if needed '''
+    # label smoothing : Hard target을 soft target으로 바꾸는 것 -> model의 over confidence 문제 해결
+    # => model의 일반화 성능 향상
+
+    ''' ex) α가 0.1일 때
+            Hard target(label): [0,1,0,0]
+            Soft target: [0.025, 0.925,0.025,0.025]'''
 
     loss = cal_loss(pred, gold, trg_pad_idx, smoothing=smoothing)
 
     pred = pred.max(1)[1]
-    gold = gold.contiguous().view(-1)
+    gold = gold.contiguous().view(-1) #gold를 평평하게 펼쳐서 model의 출력과 비교할 수 있도록 함 (일반적으로 loss funciton에서 요구)
+    # padding 된 token을 masking (패딩 된 위치:0, 패딩되지 않은 위치 :1)
     non_pad_mask = gold.ne(trg_pad_idx)
+    #선택된 예측값 중, 예측이 맞은 개수 계산
     n_correct = pred.eq(gold).masked_select(non_pad_mask).sum().item()
+    # padding 된 부분을 제외하고, model이 정확하게 예측 한 단어의 총 개수
     n_word = non_pad_mask.sum().item()
 
     return loss, n_correct, n_word
@@ -43,26 +53,30 @@ def cal_loss(pred, gold, trg_pad_idx, smoothing=False):
     gold = gold.contiguous().view(-1)
 
     if smoothing:
-        eps = 0.1
-        n_class = pred.size(1)
+        eps = 0.1 #smoothing parameter
+        n_class = pred.size(1) #number_of_class
 
+        #실제 정답값에 대한 one-hot encoding -> smoothing 적용해서 정답 class의 확률 낮추고, 나머지 확률 높임
         one_hot = torch.zeros_like(pred).scatter(1, gold.view(-1, 1), 1)
         one_hot = one_hot * (1 - eps) + (1 - one_hot) * eps / (n_class - 1)
         log_prb = F.log_softmax(pred, dim=1)
 
         non_pad_mask = gold.ne(trg_pad_idx)
         loss = -(one_hot * log_prb).sum(dim=1)
-        loss = loss.masked_select(non_pad_mask).sum()  # average later
+        #padding 된 부분 masking 하여 loss 계산
+        loss = loss.masked_select(non_pad_mask).sum()  # average later (masking 된 부분은, 나중에 평균 내기 위해 사용)
     else:
         loss = F.cross_entropy(pred, gold, ignore_index=trg_pad_idx, reduction='sum')
     return loss
 
 
+#src sequence 전처리 -> 적합한 형태
 def patch_src(src, pad_idx):
     src = src.transpose(0, 1)
     return src
 
 
+#trg sequence 전처리
 def patch_trg(trg, pad_idx):
     trg = trg.transpose(0, 1)
     trg, gold = trg[:, :-1], trg[:, 1:].contiguous().view(-1)
@@ -70,15 +84,15 @@ def patch_trg(trg, pad_idx):
 
 
 def train_epoch(model, training_data, optimizer, opt, device, smoothing):
-    ''' Epoch operation in training phase'''
+    ''' Epoch: 모든 dataset을 학습하는 횟수 operation in training phase'''
 
-    model.train()
+    model.train() #model을 train mode로 설정 -> dropout, batch normalization 활성화
     total_loss, n_word_total, n_word_correct = 0, 0, 0 
 
     desc = '  - (Training)   '
     for batch in tqdm(training_data, mininterval=2, desc=desc, leave=False):
 
-        # prepare data
+        # prepare data -> padding 된 상태에서, GPU로 이동
         src_seq = patch_src(batch.src, opt.src_pad_idx).to(device)
         trg_seq, gold = map(lambda x: x.to(device), patch_trg(batch.trg, opt.trg_pad_idx))
 
@@ -86,11 +100,11 @@ def train_epoch(model, training_data, optimizer, opt, device, smoothing):
         optimizer.zero_grad()
         pred = model(src_seq, trg_seq)
 
-        # backward and update parameters
+        # backward: gradient수행, and update parameters
         loss, n_correct, n_word = cal_performance(
             pred, gold, opt.trg_pad_idx, smoothing=smoothing) 
         loss.backward()
-        optimizer.step_and_update_lr()
+        optimizer.step_and_update_lr() #gradient를 기반으로 model의 parameter update
 
         # note keeping
         n_word_total += n_word
@@ -105,11 +119,11 @@ def train_epoch(model, training_data, optimizer, opt, device, smoothing):
 def eval_epoch(model, validation_data, device, opt):
     ''' Epoch operation in evaluation phase '''
 
-    model.eval()
+    model.eval() #model을 evaluate mode로 설정 -> dropout, batch normalization 비활성화
     total_loss, n_word_total, n_word_correct = 0, 0, 0
 
     desc = '  - (Validation) '
-    with torch.no_grad():
+    with torch.no_grad(): #gradient 계산 X -> model의 parameter 업데이트 되지 않음 -> 속도 상승, 메모리 절약
         for batch in tqdm(validation_data, mininterval=2, desc=desc, leave=False):
 
             # prepare data
@@ -135,11 +149,13 @@ def train(model, training_data, validation_data, optimizer, device, opt):
     ''' Start training '''
 
     # Use tensorboard to plot curves, e.g. perplexity, accuracy, learning rate
+    #학습 곡선 plot
     if opt.use_tb:
         print("[Info] Use Tensorboard")
         from torch.utils.tensorboard import SummaryWriter
         tb_writer = SummaryWriter(log_dir=os.path.join(opt.output_dir, 'tensorboard'))
 
+    #학습 및 검증 결과를 저장할 file 설정
     log_train_file = os.path.join(opt.output_dir, 'train.log')
     log_valid_file = os.path.join(opt.output_dir, 'valid.log')
 
@@ -298,21 +314,32 @@ def main():
     optimizer = ScheduledOptim(
         optim.Adam(transformer.parameters(), betas=(0.9, 0.98), eps=1e-09),
         opt.lr_mul, opt.d_model, opt.n_warmup_steps)
+    
+    
 
     train(transformer, training_data, validation_data, optimizer, device, opt)
 
 
+# Batch : 모델을 학습 할 때, 한 Iteration(1회 반복)당 사용되는 example set
+# Iteration : 정해진 batch_size를 이용해서 학습(forward-backward) 반복하는 횟수
+# 한 번의 epoch를 위해 여러 번의 iteration 요구됨 
+    # -> training/validation error가 동일하게 감소하다가, validation error가 증가하기 직전의 epoch선택(overfitting 방지)
+
+# dataloader -> mini batch 만들어줌(dataset이 batch size로 쪼개짐)
+
+#BPE로 encoding 된 data file 사용하여 data loader 준비
 def prepare_dataloaders_from_bpe_files(opt, device):
-    batch_size = opt.batch_size
-    MIN_FREQ = 2
+    batch_size = opt.batch_size #bathc 하나에 포함되는 example set 갯수 고려
+    MIN_FREQ = 2 #최소 빈도수
     if not opt.embs_share_weight:
-        raise
+        raise #단어 embedding을 공유하지 않는 경우 error 발생
 
     data = pickle.load(open(opt.data_pkl, 'rb'))
     MAX_LEN = data['settings'].max_len
     field = data['vocab']
     fields = (field, field)
 
+    #문장 길이를 기준으로 example filtering
     def filter_examples_with_length(x):
         return len(vars(x)['src']) <= MAX_LEN and len(vars(x)['trg']) <= MAX_LEN
 
@@ -331,11 +358,13 @@ def prepare_dataloaders_from_bpe_files(opt, device):
     opt.src_pad_idx = opt.trg_pad_idx = field.vocab.stoi[Constants.PAD_WORD]
     opt.src_vocab_size = opt.trg_vocab_size = len(field.vocab)
 
+    #batch 크기에 따라 data 정렬 및 padding -> 메모리 사용량 최적화
     train_iterator = BucketIterator(train, batch_size=batch_size, device=device, train=True)
     val_iterator = BucketIterator(val, batch_size=batch_size, device=device)
-    return train_iterator, val_iterator
+    return train_iterator, val_iterator #model 학습 시, batch 단위로 data제공 가능
 
 
+# pickle 파일을 사용하여  data loader준비
 def prepare_dataloaders(opt, device):
     batch_size = opt.batch_size
     data = pickle.load(open(opt.data_pkl, 'rb'))

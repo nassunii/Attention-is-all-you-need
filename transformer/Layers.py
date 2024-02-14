@@ -28,7 +28,10 @@ class DecoderLayer(nn.Module): # 디코더 레이어를 정의한다.
 
     def __init__(self, d_model, d_inner, n_head, d_k, d_v, dropout=0.1): # 인코더와 동일하다.
         super(DecoderLayer, self).__init__()
+        #두 번의 Attention 을 거침
+        #첫 번째 Self-Attention is Masked Multi-head Attention
         self.slf_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, dropout=dropout) # 디코더의 self-attention 레이어 정의.
+        #두 번째 Attention에서 encoder의 Attention 참조(=output과 Attention 함께 return)
         self.enc_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, dropout=dropout) # 디코더의 encoder-decoder-attention 레이어 정의
         self.pos_ffn = PositionwiseFeedForward(d_model, d_inner, dropout=dropout) # 디코더의 위치별 FeedForawrd 레이어 정의.
 

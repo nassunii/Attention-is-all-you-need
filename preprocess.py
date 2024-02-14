@@ -21,10 +21,12 @@ from apply_bpe import BPE
 __author__ = "Yu-Hsiang Huang"
 
 
+#data 전처리 과정
+#윈시 데이터 다운로드 및 추출
 _TRAIN_DATA_SOURCES = [
     {"url": "http://data.statmt.org/wmt17/translation-task/" \
              "training-parallel-nc-v12.tgz",
-     "trg": "news-commentary-v12.de-en.en",
+     "trg": "news-commentary-v12.de-en.en", 
      "src": "news-commentary-v12.de-en.de"},
     #{"url": "http://www.statmt.org/wmt13/training-parallel-commoncrawl.tgz",
     # "trg": "commoncrawl.de-en.en",
@@ -32,7 +34,7 @@ _TRAIN_DATA_SOURCES = [
     #{"url": "http://www.statmt.org/wmt13/training-parallel-europarl-v7.tgz",
     # "trg": "europarl-v7.de-en.en",
     # "src": "europarl-v7.de-en.de"}
-    ]
+    ] 
 
 _VAL_DATA_SOURCES = [
     {"url": "http://data.statmt.org/wmt17/translation-task/dev.tgz",
@@ -46,13 +48,17 @@ _TEST_DATA_SOURCES = [
      "src": "newstest2014.de"}]
 
 
-class TqdmUpTo(tqdm):
+class TqdmUpTo(tqdm): #file 다운로드 진행 상태 표시
+    # b : 현재 진행 상태에서 새로 업데이트 된 진행 상태까지의 byte 수
+    # bsize : 한 번에 다운로드 되는 데이터의 크기 (byte 단위로 측정) 
+    # tsize : 전체 파일 크기 
     def update_to(self, b=1, bsize=1, tsize=None):
         if tsize is not None:
             self.total = tsize
         self.update(b * bsize - self.n)
 
 
+#지정 된 디렉토리(dir) 내에 특정 파일(file_name)이 존재하는지
 def file_exist(dir_name, file_name):
     for sub_dir, _, files in os.walk(dir_name):
         if file_name in files:
@@ -60,20 +66,27 @@ def file_exist(dir_name, file_name):
     return None
 
 
+#src_filename : 소스파일(원본 파일)
+#trg_filename : 타겟파일(번역된 파일)
 def download_and_extract(download_dir, url, src_filename, trg_filename):
+    #src와 trg file이 다운로드 되어있는지 확인
     src_path = file_exist(download_dir, src_filename)
     trg_path = file_exist(download_dir, trg_filename)
 
+    #존재하면, 메시지 출력 후 해당 파일의 path return
     if src_path and trg_path:
         sys.stderr.write(f"Already downloaded and extracted {url}.\n")
         return src_path, trg_path
-
+    
+    #존재하지 않을 경우, download
     compressed_file = _download_file(download_dir, url)
 
+    #download한 파일 tarfile 모듈 활용해 열기
     sys.stderr.write(f"Extracting {compressed_file}.\n")
     with tarfile.open(compressed_file, "r:gz") as corpus_tar:
         corpus_tar.extractall(download_dir)
 
+    #다시 한 번, #src와 trg file이 다운로드 되어있는지 확인
     src_path = file_exist(download_dir, src_filename)
     trg_path = file_exist(download_dir, trg_filename)
 
@@ -94,6 +107,8 @@ def _download_file(download_dir, url):
     return filename
 
 
+#원시 데이터(raw data)를 다운로드 하고 추출하는 과정
+#source : 각 데이터의 URL 및 해당 데이터의 scr_filename, trg_filename 포함
 def get_raw_files(raw_dir, sources):
     raw_files = { "src": [], "trg": [], }
     for d in sources:
@@ -103,19 +118,29 @@ def get_raw_files(raw_dir, sources):
     return raw_files
 
 
+#주어진 디렉토리(dir)가 존재하지 않는 경우, 해당 dir 생성
 def mkdir_if_needed(dir_name):
+    #if dir_name이 dir가 아니라면,
     if not os.path.isdir(dir_name):
+        #dir_name에 해당하는 dir 생성
         os.makedirs(dir_name)
 
 
+#원본 데이터 파일들을 합쳐서, 하나의 src file과 trg file로 병합
+#raw_dir : 원본 파일들이 저장되어 있음
+#raw_files : src file과 trg file의 경로 저장됨(dict)
 def compile_files(raw_dir, raw_files, prefix):
+    # 경로(path) 지정
     src_fpath = os.path.join(raw_dir, f"raw-{prefix}.src")
     trg_fpath = os.path.join(raw_dir, f"raw-{prefix}.trg")
 
+    # 해당 path에 이미 병합된 파일 있는지 확인
     if os.path.isfile(src_fpath) and os.path.isfile(trg_fpath):
+        #존재한다면, 병합 과정 건너뜀
         sys.stderr.write(f"Merged files found, skip the merging process.\n")
         return src_fpath, trg_fpath
-
+    
+    #존재하지 않는다면, 병합 파일 생성
     sys.stderr.write(f"Merge files into two files: {src_fpath} and {trg_fpath}.\n")
 
     with open(src_fpath, 'w') as src_outf, open(trg_fpath, 'w') as trg_outf:
@@ -127,7 +152,7 @@ def compile_files(raw_dir, raw_files, prefix):
                 cntr = 0
                 for i, line in enumerate(src_inf):
                     cntr += 1
-                    src_outf.write(line.replace('\r', ' ').strip() + '\n')
+                    src_outf.write(line.replace('\r', ' ').strip() + '\n') # '\r'을 공백으로 대체
                 for j, line in enumerate(trg_inf):
                     cntr -= 1
                     trg_outf.write(line.replace('\r', ' ').strip() + '\n')
@@ -135,6 +160,7 @@ def compile_files(raw_dir, raw_files, prefix):
     return src_fpath, trg_fpath
 
 
+#BPE 사용하여 입력 파일(in_file)에서 원시 텍스트 읽어와 encoding
 def encode_file(bpe, in_file, out_file):
     sys.stderr.write(f"Read raw content from {in_file} and \n"\
             f"Write encoded content to {out_file}\n")
@@ -142,6 +168,7 @@ def encode_file(bpe, in_file, out_file):
     with codecs.open(in_file, encoding='utf-8') as in_f:
         with codecs.open(out_file, 'w', encoding='utf-8') as out_f:
             for line in in_f:
+                #출력 파일(out_file)에 encoding된 내용 작성
                 out_f.write(bpe.process_line(line))
 
 
@@ -149,14 +176,18 @@ def encode_files(bpe, src_in_file, trg_in_file, data_dir, prefix):
     src_out_file = os.path.join(data_dir, f"{prefix}.src")
     trg_out_file = os.path.join(data_dir, f"{prefix}.trg")
 
+    #이미 encoding 된 파일이 있는 경우, encoding 과정 건너뜀
     if os.path.isfile(src_out_file) and os.path.isfile(trg_out_file):
         sys.stderr.write(f"Encoded files found, skip the encoding process ...\n")
 
+    #encoding 된 파일이 없는 경우, encoding
     encode_file(bpe, src_in_file, src_out_file)
     encode_file(bpe, trg_in_file, trg_out_file)
     return src_out_file, trg_out_file
+#encoding 된 파일은 BPE를 사용하여 token화 됨
 
 
+#BPE를 사용해 데이터 처리
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-raw_dir', required=True)
@@ -241,6 +272,7 @@ def main():
 
 
 
+#BPE를 사용하지 않고 데이터 처리
 def main_wo_bpe():
     '''
     Usage: python preprocess.py -lang_src de -lang_trg en -save_data multi30k_de_en.pkl -share_vocab
