@@ -20,6 +20,7 @@ modules -> sublayers -> layers -> models
 - modules
 - sublayers
 - layers
+
   modules/ sublayers/ layers는 모두 이해가 필요하다고 생각되어 공통학습
   models.py만 파트 분배
   
