@@ -3,8 +3,9 @@
 forked from https://github.com/jadore801120/attention-is-all-you-need-pytorch  
 paper: https://arxiv.org/abs/1706.03762
 
-##스터디원
+## 스터디원
 @nassuni
+@
 
 ### 스터디 진행 과정
 스터디는 회차별 분량을 지정해 본인이 맡은 파트(사다리 타기로 결정)를 공부해온 후  
