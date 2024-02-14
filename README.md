@@ -33,7 +33,7 @@ modules -> sublayers -> layers -> models
 
 modules/ sublayers/ layers는 모두 이해가 필요하다고 생각되어 공통학습<br/>
 models.py만 파트 분배
-공통으로 학습한 부분 주석은 가장 마지막에 커밋한 사람으로 설정됨
+공통으로 학습한 부분 주석은 마지막에 커밋한 사람으로 설정됨
 <br/>
 
 *<models.py주석>*
