@@ -1,7 +1,8 @@
-# Attention is all you need: A Pytorch Implementation
+# Attention is all you need Study(Add comments)
 forked from https://github.com/jadore801120/attention-is-all-you-need-pytorch
 
-
+##스터디원
+@nassuni
 
 ### 스터디 진행 과정
 스터디는 회차별 분량을 지정해 본인이 맡은 파트(사다리 타기로 결정)를 공부해온 후  
@@ -35,6 +36,7 @@ modules -> sublayers -> layers -> models
 **[2회차]**  
 
 learn_bpe -> apply_bpe -> preprocess
+
 *<주석>*
 - learn_bpe: 다연
 - apply_bpe: 예원
