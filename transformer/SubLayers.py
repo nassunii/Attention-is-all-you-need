@@ -1,4 +1,4 @@
-# 다연
+# 공통 작성
 
 ''' Define the sublayers in encoder/decoder layer '''
 import numpy as np

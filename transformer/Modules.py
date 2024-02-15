@@ -1,4 +1,4 @@
-# 다연
+# 공통 작성
 
 import torch
 import torch.nn as nn

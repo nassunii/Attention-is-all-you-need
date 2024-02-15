@@ -1,5 +1,6 @@
 '''
 This script handles the training process.
+[[예선 주석]]
 '''
 
 import argparse

@@ -1,4 +1,4 @@
-# 다연
+# 공통 작성
 
 ''' Define the Layers '''
 import torch.nn as nn # torch.nn은 PyTorch에서 신경망을 구축할 수 있게 해주는 패키지다.
