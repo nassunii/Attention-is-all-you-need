@@ -1,3 +1,5 @@
+# 다연
+
 '''A wrapper class for scheduled optimizer ''' # 학습률을 동적으로 스케줄하기 위한 클래스다.
 # 옵티마이저는 모델의 가중치를 조절하여 손실 함수를 최소화하는 방향으로 학습하는 알고리즘이다.
 import numpy as np
