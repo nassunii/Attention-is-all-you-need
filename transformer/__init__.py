@@ -1,4 +1,4 @@
-# 다연
+# 공통
 
 # transformer 패키지를 이용하기 위하여 가져온다.
 import transformer.Constants
