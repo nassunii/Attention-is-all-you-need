@@ -1,3 +1,5 @@
+# 다연
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F # PyTorch의 함수 계산을 할 수 있게 해주는 모듈이다.
