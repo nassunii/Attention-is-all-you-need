@@ -4,9 +4,11 @@ paper: https://arxiv.org/abs/1706.03762
 <br/><br/>
 
 ## 스터디원
-- [Yeseon Hong](https://github.com/nassunii)
-- [Dayeon Seo](https://github.com/dayeon-seo)
 - [Yewon Kim](https://github.com/yewonkim01)
+- [Dayeon Seo](https://github.com/dayeon-seo)
+- [Yeseon Hong](https://github.com/nassunii)
+
+
 
 <br/>
 
