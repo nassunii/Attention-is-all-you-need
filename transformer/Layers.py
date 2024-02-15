@@ -1,3 +1,5 @@
+# 다연
+
 ''' Define the Layers '''
 import torch.nn as nn # torch.nn은 PyTorch에서 신경망을 구축할 수 있게 해주는 패키지다.
 import torch # PyTorch는 미분을 자동으로 해줘서 구한 기울기로 가중치를 이용할 수 있게 해준다.
