@@ -11,6 +11,9 @@ Rico Sennrich, Barry Haddow and Alexandra Birch (2016). Neural Machine Translati
 Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics (ACL 2016). Berlin, Germany.
 """
 
+# 다연
+
+
 # BPE를 이용하여 주어진 텍스트의 어휘를 가변 길이로 인코딩하는 것을 목적으로 한다.
 # BPE는 텍스트 어휘를 구성하는 단어 또는 문자열의 쌍을 찾아서 합치는 과정을 반복하면서 어휘의 크기를 줄이는 방법이다.
 # 이 코드에서는 원본 텍스트를 압축하지 않고 심볼 수로 어휘의의 크기를 줄이는 것에 사용된다.
