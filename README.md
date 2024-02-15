@@ -37,12 +37,12 @@ models.py만 파트 분배<br/>
 
 *<주석>*
 ```
+공통으로 학습한 부분 주석은 마지막에 커밋한 사람으로 설정됨
 - encoder: 예선
 - decoder: 다연
 - transformer: 예원
 
 models.py 내 encoder, decoder, transformer 외 다른 함수는 본인 클래스에서 필요한 경우 주석달기
-공통으로 학습한 부분 주석은 마지막에 커밋한 사람으로 설정됨
 ```
 ---
 
