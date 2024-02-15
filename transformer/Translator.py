@@ -1,4 +1,4 @@
-"""다연 작성"""
+# 다연
 
 ''' This module will handle the text generation with beam search. '''
 # beam search를 사용해서 텍스트를 생성한다.  
